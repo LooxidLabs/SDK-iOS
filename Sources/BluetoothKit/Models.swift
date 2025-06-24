@@ -123,13 +123,13 @@ public struct EEGReading: Sendable {
     ///
     /// 아날로그-디지털 변환기에서 직접 얻은 24비트 정수값입니다.
     /// 디버깅이나 고급 신호 처리에 사용될 수 있습니다.
-    public let ch1Raw: Int32     // Raw ADC value for channel 1
+    public let ch1Raw: Int32     // 채널 1 원시 ADC 값
     
     /// 채널 2의 원시 ADC 값입니다.
     ///
     /// 아날로그-디지털 변환기에서 직접 얻은 24비트 정수값입니다.
     /// 디버깅이나 고급 신호 처리에 사용될 수 있습니다.
-    public let ch2Raw: Int32     // Raw ADC value for channel 2
+    public let ch2Raw: Int32     // 채널 2 원시 ADC 값
     
     /// 전극 연결 해제 상태를 나타냅니다.
     ///

@@ -29,12 +29,12 @@ internal class DataRecorder: @unchecked Sendable {
     private let logger: InternalLogger
     private var selectedSensorTypes: Set<SensorType> = [.eeg, .ppg, .accelerometer]
     
-    // Unified file writers using a serial queue for thread safety
+    // 스레드 안전성을 위해 시리얼 큐를 사용하는 통합 파일 작성기들
     private let fileQueue = DispatchQueue(label: "com.bluetoothkit.filewriter", qos: .utility)
     private var csvWriters: [SensorType: FileWriter] = [:]
     private var rawDataWriter: FileWriter?
     
-    // Raw data storage for JSON - protected by main actor
+    // JSON용 원시 데이터 저장소 - 메인 액터에서 보호됨
     private var rawDataDict: [String: Any] = [:]
     private var currentRecordingFiles: [URL] = []
     
@@ -102,8 +102,8 @@ internal class DataRecorder: @unchecked Sendable {
     /// - Parameter selectedSensors: 기록할 센서 타입들의 집합
     internal func startRecording(with selectedSensors: Set<SensorType> = [.eeg, .ppg, .accelerometer]) {
         guard recordingState == .idle else {
-            let error = BluetoothKitError.recordingFailed("Already recording")
-            log("Failed to start recording: Already recording")
+            let error = BluetoothKitError.recordingFailed("이미 기록 중입니다")
+            log("기록 시작 실패: 이미 기록 중")
             notifyRecordingError(error)
             return
         }
@@ -116,7 +116,7 @@ internal class DataRecorder: @unchecked Sendable {
             notifyRecordingStarted(at: Date())
         } catch {
             notifyRecordingError(error)
-            log("Failed to start recording: \(error.localizedDescription)")
+            log("기록 시작 실패: \(error.localizedDescription)")
         }
     }
     
@@ -134,7 +134,7 @@ internal class DataRecorder: @unchecked Sendable {
         } catch {
             recordingState = .idle
             notifyRecordingError(error)
-            log("Failed to stop recording: \(error.localizedDescription)")
+            log("기록 중지 실패: \(error.localizedDescription)")
         }
     }
     
@@ -158,7 +158,7 @@ internal class DataRecorder: @unchecked Sendable {
         }
     }
     
-    // MARK: - Unified Data Recording Methods
+    // MARK: - 통합 데이터 기록 메서드들
     
     /// EEG 데이터를 기록합니다.
     ///
@@ -224,10 +224,10 @@ internal class DataRecorder: @unchecked Sendable {
     /// - Parameter reading: 기록할 배터리 읽기값
     internal func recordBatteryData(_ reading: BatteryReading) {
         guard isRecording else { return }
-        // Battery data is not typically recorded in bulk files
+        // 배터리 데이터는 일반적으로 대량 파일에 기록되지 않음
     }
     
-    // MARK: - Private Unified Helpers
+    // MARK: - 프라이빗 통합 헬퍼들
     
     private func canRecord(_ sensorType: SensorType) -> Bool {
         return isRecording && selectedSensorTypes.contains(sensorType)
@@ -239,12 +239,12 @@ internal class DataRecorder: @unchecked Sendable {
         csvData: [T],
         rawDataEntries: [(String, Any)]
     ) {
-        // Add to raw data dict
+        // 원시 데이터 딕셔너리에 추가
         for (key, value) in rawDataEntries {
             appendToRawDataDict(key, value: value)
         }
         
-        // Write to CSV
+        // CSV에 작성
         if let writer = csvWriters[sensorType] {
             let timestampValue = timestamp.timeIntervalSince1970
             let csvStringValues = [String(timestampValue)] + csvData.map { String(describing: $0) }
@@ -272,10 +272,10 @@ internal class DataRecorder: @unchecked Sendable {
         currentRecordingFiles = []
         csvWriters = [:]
         
-        // Setup JSON file
+        // JSON 파일 설정
         try setupJSONFile(timestamp: timestamp)
         
-        // Setup CSV files for selected sensors
+        // 선택된 센서들을 위한 CSV 파일 설정
         for sensorType in selectedSensorTypes {
             try setupCSVFile(for: sensorType, timestamp: timestamp)
         }
@@ -314,7 +314,7 @@ internal class DataRecorder: @unchecked Sendable {
     private func createFileWriter(at url: URL, setup: (FileWriter) throws -> Void) throws {
         FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
         guard let handle = try? FileHandle(forWritingTo: url) else {
-            throw BluetoothKitError.fileOperationFailed("Could not create file at \(url.path)")
+            throw BluetoothKitError.fileOperationFailed("\(url.path)에서 파일을 생성할 수 없습니다")
         }
         
         let writer = FileWriter(fileHandle: handle)
@@ -330,10 +330,10 @@ internal class DataRecorder: @unchecked Sendable {
     }
     
     private func finalizeRecording() throws {
-        // Save JSON file
+        // JSON 파일 저장
         try saveJSONFile()
         
-        // Close all file handles
+        // 모든 파일 핸들 닫기
         closeAllWriters()
     }
     
@@ -357,7 +357,7 @@ internal class DataRecorder: @unchecked Sendable {
             handle.seek(toFileOffset: 0)
             handle.write(jsonData)
         } catch {
-            throw BluetoothKitError.fileOperationFailed("Failed to encode JSON: \(error)")
+            throw BluetoothKitError.fileOperationFailed("JSON 인코딩 실패: \(error)")
         }
     }
     
@@ -375,7 +375,7 @@ internal class DataRecorder: @unchecked Sendable {
         logger.log(message, file: file, function: function, line: line)
     }
     
-    // MARK: - Unified Notification Methods
+    // MARK: - 통합 알림 메서드들
     
     private func notifyOnMainThread(_ action: @escaping @Sendable () -> Void) {
         if Thread.isMainThread {
@@ -429,7 +429,7 @@ private extension SensorType {
     }
 }
 
-// MARK: - File Writer Helper
+// MARK: - 파일 작성기 헬퍼
 
 private class FileWriter {
     let fileHandle: FileHandle
@@ -445,7 +445,7 @@ private class FileWriter {
     }
 }
 
-// MARK: - JSON Data Structure
+// MARK: - JSON 데이터 구조
 
 private struct SensorDataJSON: Encodable {
     let timestamp: [Double]

@@ -38,57 +38,57 @@ internal class SensorDataParser: @unchecked Sendable {
     
     // MARK: - EEG Data Parsing
     
-    /// Parses raw EEG data packets into structured readings.
+    /// 원시 EEG 데이터 패킷을 구조화된 읽기값으로 파싱합니다.
     ///
-    /// - Parameter data: Raw binary data from EEG characteristic
-    /// - Returns: Array of EEG readings extracted from the packet
-    /// - Throws: `BluetoothKitError.dataParsingFailed` if packet format is invalid
+    /// - Parameter data: EEG 특성으로부터 수신된 원시 바이너리 데이터
+    /// - Returns: 패킷에서 추출된 EEG 읽기값 배열
+    /// - Throws: 패킷 형식이 잘못된 경우 `BluetoothKitError.dataParsingFailed`
     internal func parseEEGData(_ data: Data) throws -> [EEGReading] {
         let bytes = [UInt8](data)
         
-        // Check minimum packet size (header + at least one sample)
+        // 최소 패킷 크기 확인 (헤더 + 최소 하나의 샘플)
         let headerSize = 4
         guard bytes.count >= headerSize + configuration.eegSampleSize else {
-            throw BluetoothKitError.dataParsingFailed("EEG packet too short: \(bytes.count) bytes (minimum: \(headerSize + configuration.eegSampleSize))")
+            throw BluetoothKitError.dataParsingFailed("EEG 패킷이 너무 짧습니다: \(bytes.count) bytes (최소: \(headerSize + configuration.eegSampleSize))")
         }
         
-        // Calculate actual number of samples available
+        // 실제 이용 가능한 샘플 수 계산
         let dataWithoutHeader = bytes.count - headerSize
         let actualSampleCount = dataWithoutHeader / configuration.eegSampleSize
         let expectedSampleCount = (configuration.eegPacketSize - headerSize) / configuration.eegSampleSize
         
-        // Log if packet size differs from expected
+        // 패킷 크기가 예상과 다른 경우 로그 출력
         if bytes.count != configuration.eegPacketSize {
-            print("⚠️ EEG packet size: \(bytes.count) bytes (expected: \(configuration.eegPacketSize)), processing \(actualSampleCount) samples (expected: \(expectedSampleCount))")
+            print("⚠️ EEG 패킷 크기: \(bytes.count) bytes (예상: \(configuration.eegPacketSize)), \(actualSampleCount) 샘플 처리 중 (예상: \(expectedSampleCount))")
         }
         
-        // Extract timestamp from packet header
+        // 패킷 헤더에서 타임스탬프 추출
         let timeRaw = UInt32(bytes[3]) << 24 | UInt32(bytes[2]) << 16 | UInt32(bytes[1]) << 8 | UInt32(bytes[0])
         var timestamp = Double(timeRaw) / configuration.timestampDivisor / configuration.millisecondsToSeconds
         
         var readings: [EEGReading] = []
         
-        // Parse only the available samples
+        // 이용 가능한 샘플만 파싱
         for sampleIndex in 0..<actualSampleCount {
             let i = headerSize + (sampleIndex * configuration.eegSampleSize)
             
-            // Ensure we don't exceed array bounds
+            // 배열 경계를 넘지 않도록 확인
             guard i + configuration.eegSampleSize <= bytes.count else {
-                print("⚠️ EEG sample \(sampleIndex + 1) incomplete, skipping remaining samples")
+                print("⚠️ EEG 샘플 \(sampleIndex + 1) 불완전, 나머지 샘플 건너뜀")
                 break
             }
             
-            // lead-off (1 byte) - sensor connection status
+            // lead-off (1 바이트) - 센서 연결 상태
             let leadOffRaw = bytes[i]
-            let leadOffNormalized = leadOffRaw > 0  // true if any lead is disconnected
+            let leadOffNormalized = leadOffRaw > 0  // 리드가 연결 해제된 경우 true
             
-            // CH1: 3 bytes (Big Endian)
+            // CH1: 3 바이트 (Big Endian)
             var ch1Raw = Int32(bytes[i+1]) << 16 | Int32(bytes[i+2]) << 8 | Int32(bytes[i+3])
             
-            // CH2: 3 bytes (Big Endian)  
+            // CH2: 3 바이트 (Big Endian)  
             var ch2Raw = Int32(bytes[i+4]) << 16 | Int32(bytes[i+5]) << 8 | Int32(bytes[i+6])
             
-            // Handle 24-bit signed values (MSB sign extension)
+            // 24비트 부호 있는 값 처리 (MSB 부호 확장)
             if (ch1Raw & 0x800000) != 0 {
                 ch1Raw -= 0x1000000
             }
@@ -96,7 +96,7 @@ internal class SensorDataParser: @unchecked Sendable {
                 ch2Raw -= 0x1000000
             }
             
-            // Convert to voltage using configuration parameters
+            // 설정 매개변수를 사용하여 전압으로 변환
             let ch1uV = Double(ch1Raw) * configuration.eegVoltageReference / configuration.eegGain / configuration.eegResolution * configuration.microVoltMultiplier
             let ch2uV = Double(ch2Raw) * configuration.eegVoltageReference / configuration.eegGain / configuration.eegResolution * configuration.microVoltMultiplier
             
@@ -111,7 +111,7 @@ internal class SensorDataParser: @unchecked Sendable {
             
             readings.append(reading)
             
-            // Increment timestamp for next sample
+            // 다음 샘플을 위해 타임스탬프 증가
             timestamp += 1.0 / configuration.eegSampleRate
         }
         
@@ -120,43 +120,43 @@ internal class SensorDataParser: @unchecked Sendable {
     
     // MARK: - PPG Data Parsing
     
-    /// Parses raw PPG data packets into structured readings.
+    /// 원시 PPG 데이터 패킷을 구조화된 읽기값으로 파싱합니다.
     ///
-    /// - Parameter data: Raw binary data from PPG characteristic
-    /// - Returns: Array of PPG readings extracted from the packet
-    /// - Throws: `BluetoothKitError.dataParsingFailed` if packet format is invalid
+    /// - Parameter data: PPG 특성으로부터 수신된 원시 바이너리 데이터
+    /// - Returns: 패킷에서 추출된 PPG 읽기값 배열
+    /// - Throws: 패킷 형식이 잘못된 경우 `BluetoothKitError.dataParsingFailed`
     internal func parsePPGData(_ data: Data) throws -> [PPGReading] {
         let bytes = [UInt8](data)
         
-        // Check minimum packet size (header + at least one sample)
+        // 최소 패킷 크기 확인 (헤더 + 최소 하나의 샘플)
         let headerSize = 4
         guard bytes.count >= headerSize + configuration.ppgSampleSize else {
-            throw BluetoothKitError.dataParsingFailed("PPG packet too short: \(bytes.count) bytes (minimum: \(headerSize + configuration.ppgSampleSize))")
+            throw BluetoothKitError.dataParsingFailed("PPG 패킷이 너무 짧습니다: \(bytes.count) bytes (최소: \(headerSize + configuration.ppgSampleSize))")
         }
         
-        // Calculate actual number of samples available
+        // 실제 이용 가능한 샘플 수 계산
         let dataWithoutHeader = bytes.count - headerSize
         let actualSampleCount = dataWithoutHeader / configuration.ppgSampleSize
         let expectedSampleCount = (configuration.ppgPacketSize - headerSize) / configuration.ppgSampleSize
         
-        // Log if packet size differs from expected
+        // 패킷 크기가 예상과 다른 경우 로그 출력
         if bytes.count != configuration.ppgPacketSize {
-            print("⚠️ PPG packet size: \(bytes.count) bytes (expected: \(configuration.ppgPacketSize)), processing \(actualSampleCount) samples (expected: \(expectedSampleCount))")
+            print("⚠️ PPG 패킷 크기: \(bytes.count) bytes (예상: \(configuration.ppgPacketSize)), \(actualSampleCount) 샘플 처리 중 (예상: \(expectedSampleCount))")
         }
 
-        // Extract timestamp from packet header
+        // 패킷 헤더에서 타임스탬프 추출
         let timeRaw = UInt32(bytes[3]) << 24 | UInt32(bytes[2]) << 16 | UInt32(bytes[1]) << 8 | UInt32(bytes[0])
         var timestamp = Double(timeRaw) / configuration.timestampDivisor / configuration.millisecondsToSeconds
 
         var readings: [PPGReading] = []
 
-        // Parse only the available samples
+        // 이용 가능한 샘플만 파싱
         for sampleIndex in 0..<actualSampleCount {
             let i = headerSize + (sampleIndex * configuration.ppgSampleSize)
             
-            // Ensure we don't exceed array bounds
+            // 배열 경계를 넘지 않도록 확인
             guard i + configuration.ppgSampleSize <= bytes.count else {
-                print("⚠️ PPG sample \(sampleIndex + 1) incomplete, skipping remaining samples")
+                print("⚠️ PPG 샘플 \(sampleIndex + 1) 불완전, 나머지 샘플 건너뜀")
                 break
             }
             
@@ -171,7 +171,7 @@ internal class SensorDataParser: @unchecked Sendable {
             
             readings.append(reading)
             
-            // Increment timestamp for next sample
+            // 다음 샘플을 위해 타임스탬프 증가
             timestamp += 1.0 / configuration.ppgSampleRate
         }
         
@@ -180,11 +180,11 @@ internal class SensorDataParser: @unchecked Sendable {
     
     // MARK: - Accelerometer Data Parsing
     
-    /// Parses raw accelerometer data packets into structured readings.
+    /// 원시 가속도계 데이터 패킷을 구조화된 읽기값으로 파싱합니다.
     ///
-    /// - Parameter data: Raw binary data from accelerometer characteristic
-    /// - Returns: Array of accelerometer readings extracted from the packet
-    /// - Throws: `BluetoothKitError.dataParsingFailed` if packet format is invalid
+    /// - Parameter data: 가속도계 특성으로부터 수신된 원시 바이너리 데이터
+    /// - Returns: 패킷에서 추출된 가속도계 읽기값 배열
+    /// - Throws: 패킷 형식이 잘못된 경우 `BluetoothKitError.dataParsingFailed`
     internal func parseAccelerometerData(_ data: Data) throws -> [AccelerometerReading] {
         let bytes = [UInt8](data)
         
@@ -192,16 +192,16 @@ internal class SensorDataParser: @unchecked Sendable {
         let sampleSize = 6
         
         guard bytes.count >= headerSize + sampleSize else {
-            throw BluetoothKitError.dataParsingFailed("ACCEL packet too short: \(bytes.count) bytes")
+            throw BluetoothKitError.dataParsingFailed("ACCEL 패킷이 너무 짧습니다: \(bytes.count) bytes")
         }
         
-        // Extract timestamp from packet header
+        // 패킷 헤더에서 타임스탬프 추출
         let timeRaw = UInt32(bytes[3]) << 24 | UInt32(bytes[2]) << 16 | UInt32(bytes[1]) << 8 | UInt32(bytes[0])
         var timestamp = Double(timeRaw) / configuration.timestampDivisor / configuration.millisecondsToSeconds
 
         let dataWithoutHeaderCount = bytes.count - headerSize
         guard dataWithoutHeaderCount >= sampleSize else {
-            throw BluetoothKitError.dataParsingFailed("ACCEL packet has header but not enough data for one sample")
+            throw BluetoothKitError.dataParsingFailed("ACCEL 패킷에 헤더는 있지만 한 개 샘플에 대한 충분한 데이터가 없습니다")
         }
         
         let sampleCount = dataWithoutHeaderCount / sampleSize
@@ -209,7 +209,7 @@ internal class SensorDataParser: @unchecked Sendable {
 
         for i in 0..<sampleCount {
             let baseInFullPacket = headerSize + (i * sampleSize)
-            // Use odd-numbered bytes as per hardware specification
+            // 하드웨어 사양에 따라 홀수 번째 바이트 사용
             let x = Int16(bytes[baseInFullPacket + 1])  // data[i+1]
             let y = Int16(bytes[baseInFullPacket + 3])  // data[i+3] 
             let z = Int16(bytes[baseInFullPacket + 5])  // data[i+5]
@@ -223,7 +223,7 @@ internal class SensorDataParser: @unchecked Sendable {
             
             readings.append(reading)
             
-            // Increment timestamp for next sample
+            // 다음 샘플을 위해 타임스탬프 증가
             timestamp += 1.0 / configuration.accelerometerSampleRate
         }
         
@@ -232,14 +232,14 @@ internal class SensorDataParser: @unchecked Sendable {
     
     // MARK: - Battery Data Parsing
     
-    /// Parses raw battery data into a structured reading.
+    /// 원시 배터리 데이터를 구조화된 읽기값으로 파싱합니다.
     ///
-    /// - Parameter data: Raw binary data from battery characteristic
-    /// - Returns: Battery reading with current level
-    /// - Throws: `BluetoothKitError.dataParsingFailed` if data is invalid
+    /// - Parameter data: 배터리 특성으로부터 수신된 원시 바이너리 데이터
+    /// - Returns: 현재 배터리 레벨을 포함한 배터리 읽기값
+    /// - Throws: 데이터가 유효하지 않은 경우 `BluetoothKitError.dataParsingFailed`
     internal func parseBatteryData(_ data: Data) throws -> BatteryReading {
         guard let level = data.first else {
-            throw BluetoothKitError.dataParsingFailed("Battery data is empty")
+            throw BluetoothKitError.dataParsingFailed("배터리 데이터가 비어있습니다")
         }
         
         return BatteryReading(level: level)
