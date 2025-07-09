@@ -108,10 +108,6 @@ BluetoothKit-SDK/
     └── ViewModelTypes.swift              # UI 바인딩용 타입 정의
 ```
 
-### 요구사항
-- Xcode 15.0 이상
-- iOS 13.0+ 디바이스 (Bluetooth 기능 필요)
-- Swift 6.1+
 
 # 링크밴드 SDK 어댑터 기능 가이드
 
