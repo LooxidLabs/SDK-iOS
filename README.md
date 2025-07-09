@@ -108,27 +108,10 @@ BluetoothKit-SDK/
     └── ViewModelTypes.swift              # UI 바인딩용 타입 정의
 ```
 
-## 설치 및 사용
-
-### Swift Package Manager 통합
-프로젝트의 Package.swift 파일에 종속성을 추가하거나 Xcode에서 Package Manager를 통해 추가할 수 있습니다.
-
-### 기본 사용법
-1. **✅ 권장: SDK Adapter 사용**: SwiftUI 프로젝트에서 ViewModel을 통한 바인딩 사용
-2. **배치 데이터 설정**: BatchDataConfigurationViewModel을 통한 고급 데이터 수집 설정
-3. **고급 사용: SDK 직접 사용**: UIKit 프로젝트에서 BluetoothKit 클래스와 델리게이트 패턴 사용
-
-## 개발 및 테스트
-
 ### 요구사항
 - Xcode 15.0 이상
 - iOS 13.0+ 디바이스 (Bluetooth 기능 필요)
 - Swift 6.1+
-
-### 빌드 및 실행
-1. 프로젝트를 Xcode에서 열기
-2. 타겟을 실제 iOS 디바이스로 설정 (시뮬레이터는 Bluetooth 미지원)
-3. 빌드 및 실행
 
 # 링크밴드 SDK 어댑터 기능 가이드
 
