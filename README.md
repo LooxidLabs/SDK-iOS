@@ -563,13 +563,6 @@ struct SensorToggleButton: View {
     }
 }
 
-// 5. 프리뷰
-struct SensorActivationSampleView_Previews: PreviewProvider {
-    static var previews: some View {
-        SensorActivationSampleView(bluetoothKit: BluetoothKitViewModel())
-    }
-} 
-
 ### 5. 수신된 센서 데이터 카드 생성 및 실시간 출력
 
 ```swift
