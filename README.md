@@ -401,6 +401,7 @@ struct ConnectionStatusView: View {
 
 ### 4. 센서 활성화 및 데이터 출력
 
+```
 import SwiftUI
 
 struct SensorActivationSampleView: View {
@@ -562,6 +563,7 @@ struct SensorToggleButton: View {
         .buttonStyle(.plain)
     }
 }
+```
 
 ### 5. 수신된 센서 데이터 카드 생성 및 실시간 출력
 
