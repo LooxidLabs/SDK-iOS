@@ -741,7 +741,7 @@ struct RecordingControlView: View {
 }
 ```
 
-### 6. 연결 상태 모니터링
+### 6. 블루투스 연결 상태 확인 및 연결 해제
 
 ```swift
 struct ConnectionStatusView: View {
