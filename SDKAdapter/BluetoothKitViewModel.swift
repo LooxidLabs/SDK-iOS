@@ -227,7 +227,7 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     // MARK: - SDK Instance
     
     /// 실제 비즈니스 로직을 담당하는 BluetoothKit 인스턴스
-    private let bluetoothKit: BluetoothKit
+    internal let bluetoothKit: BluetoothKit
     
     // MARK: - Initialization
     
