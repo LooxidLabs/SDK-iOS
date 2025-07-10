@@ -126,7 +126,7 @@ LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터
 
 ### 링크밴드 SDK 어댑터 다운받기
 
-1. 터미널을 열고 Xcode 프로젝트 루트 폴더로 이동합니다.
+1. 터미널을 열고 Xcode 프로젝트 루트 폴더(Assets.xcassets파일이 있는 폴더)로 이동합니다.
 2. 아래 커맨드를 복사해 붙여넣으면 SDK 어댑터가 Xcode 프로젝트 안에 자동으로 생성되고 다운로드됩니다.
 
 ```bash
@@ -252,12 +252,12 @@ struct ContentView: View {
     var body: some View {
         ScrollView {
             VStack {
-                ConnectionStatusView(bluetoothKit: bluetoothKit)
                 ScanControlView(bluetoothKit: bluetoothKit)
-                RecordingControlView(bluetoothKit: bluetoothKit)
                 DeviceListView(bluetoothKit: bluetoothKit)
-                SensorDataView(bluetoothKit: bluetoothKit)
+                ConnectionStatusView(bluetoothKit: bluetoothKit)
                 SensorActivationSampleView(bluetoothKit: bluetoothKit)
+                SensorDataView(bluetoothKit: bluetoothKit)
+                RecordingControlView(bluetoothKit: bluetoothKit)
             }
             .padding()
         }
@@ -265,7 +265,7 @@ struct ContentView: View {
 }
 ```
 
-### 1. Bluetooth 스캔
+### 1. 링크밴드 디바이스 Bluetooth 스캔
 
 ```swift
 struct ScanControlView: View {
@@ -401,330 +401,174 @@ struct ConnectionStatusView: View {
 
 ### 4. 센서 활성화 및 데이터 출력
 
-```swift
 import SwiftUI
 
-struct SensorDataView: View {
+struct SensorActivationSampleView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
+    // 1. BatchDataConfigurationViewModel을 사용하여 센서 제어
+    @StateObject private var viewModel: BatchDataConfigurationViewModel
+    
+    init(bluetoothKit: BluetoothKitViewModel) {
+        self.bluetoothKit = bluetoothKit
+        self._viewModel = StateObject(wrappedValue: BatchDataConfigurationViewModel(bluetoothKit: bluetoothKit.bluetoothKit))
+    }
     
     var body: some View {
+        VStack(spacing: 20) {
+            Text("센서 활성화 샘플")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            controlButtonsSection
+        }
+        .padding()
+    }
+    
+    // 2. 센서 선택 + 활성화 버튼 섹션
+    private var controlButtonsSection: some View {
         VStack(spacing: 16) {
-            // EEG 데이터 표시
-            if let eegReading = bluetoothKit.latestEEGReading {
-                EEGDataCard(reading: eegReading)
-            }
             
-            // PPG 데이터 표시
-            if let ppgReading = bluetoothKit.latestPPGReading {
-                PPGDataCard(reading: ppgReading)
-            }
-            
-            // 가속도계 데이터 표시
-            if let accelReading = bluetoothKit.latestAccelerometerReading {
-                AccelerometerDataCard(reading: accelReading, bluetoothKit: bluetoothKit)
-            }
-            
-            // 배터리 데이터 표시
-            if let batteryReading = bluetoothKit.latestBatteryReading {
-                BatteryDataCard(reading: batteryReading)
-            }
-        }
-    }
-}
-
-struct EEGDataCard: View {
-    let reading: EEGData
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "brain.head.profile")
-                    .foregroundColor(.purple)
-                    .font(.title2)
-                Text("EEG 데이터")
+            // --- 센서 선택 부분 ---
+            VStack(alignment: .leading, spacing: 8) {
+                Text("센서 선택")
                     .font(.headline)
-                    .foregroundColor(.purple)
-                Spacer()
-                Image(systemName: reading.leadOff ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                    .foregroundColor(reading.leadOff ? .red : .green)
-            }
-            .frame(maxWidth: .infinity)
-            
-            HStack(spacing: 20) {
-                VStack {
-                    Text("CH1")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(String(format: "%.1f µV", reading.channel1))
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
                 
-                VStack {
-                    Text("CH2")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(String(format: "%.1f µV", reading.channel2))
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                
-                VStack {
-                    Text("센서 접촉 상태")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(reading.leadOff ? "접촉 안됨" : "접촉됨")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(reading.leadOff ? .red : .green)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.purple.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.purple.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
-struct PPGDataCard: View {
-    let reading: PPGData
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundColor(.red)
-                    .font(.title2)
-                Text("PPG 데이터")
-                    .font(.headline)
-                    .foregroundColor(.red)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            HStack(spacing: 30) {
-                VStack {
-                    Text("RED")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(reading.red)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                
-                VStack {
-                    Text("IR")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(reading.ir)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.red.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
-struct AccelerometerDataCard: View {
-    let reading: AccelerometerData
-    @ObservedObject var bluetoothKit: BluetoothKitViewModel
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            // 헤더 섹션
-            VStack(spacing: 8) {
-                HStack {
-                    Image(systemName: "move.3d")
-                        .foregroundColor(.blue)
-                        .font(.title2)
-                    Text("ACC")
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                    Spacer()
-                }
-                
-                // 세그먼트 컨트롤 스타일의 토글
-                HStack(spacing: 0) {
-                    // 원시값 버튼
-                    Button(action: {
-                        bluetoothKit.accelerometerMode = .raw
-                    }) {
-                        Text("원시값")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(bluetoothKit.accelerometerMode == .raw ? Color.blue : Color.clear)
-                            )
-                            .foregroundColor(bluetoothKit.accelerometerMode == .raw ? .white : .blue)
+                HStack(spacing: 12) {
+                    // EEG 센서 토글
+                    SensorToggleButton(
+                        title: "EEG",
+                        isSelected: viewModel.selectedSensors.contains(.eeg),
+                        color: .purple
+                    ) {
+                        toggleSensor(.eeg)
                     }
-                    .disabled(bluetoothKit.isRecording)
                     
-                    // 움직임 버튼
-                    Button(action: {
-                        bluetoothKit.accelerometerMode = .motion
-                    }) {
-                        Text("움직임")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(bluetoothKit.accelerometerMode == .motion ? Color.blue : Color.clear)
-                            )
-                            .foregroundColor(bluetoothKit.accelerometerMode == .motion ? .white : .blue)
+                    // PPG 센서 토글
+                    SensorToggleButton(
+                        title: "PPG", 
+                        isSelected: viewModel.selectedSensors.contains(.ppg),
+                        color: .red
+                    ) {
+                        toggleSensor(.ppg)
                     }
-                    .disabled(bluetoothKit.isRecording)
-                }
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.blue, lineWidth: 1)
-                )
-                .opacity(bluetoothKit.isRecording ? 0.5 : 1.0)
-                
-                // 설명 텍스트
-                HStack {
-                    Text(bluetoothKit.accelerometerMode.description)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Spacer()
+                    
+                    // ACC 센서 토글
+                    SensorToggleButton(
+                        title: "ACC",
+                        isSelected: viewModel.selectedSensors.contains(.accelerometer),
+                        color: .blue
+                    ) {
+                        toggleSensor(.accelerometer)
+                    }
                 }
             }
             
-            // 데이터 표시 섹션
-            // BluetoothKit에서 이미 모드에 따라 처리된 데이터를 그대로 표시
-            HStack(spacing: 20) {
-                VStack {
-                    Text("X축")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(reading.x)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+            // --- 모니터링 제어 버튼 ---
+            HStack(spacing: 12) {
+                if viewModel.isMonitoringActive {
+                    // 모니터링 중지 버튼
+                    Button("모니터링 중지") {
+                        viewModel.stopMonitoring()  // ✅ 센서 비활성화
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                } else {
+                    // 모니터링 시작 버튼 (핵심!)
+                    Button("모니터링 시작") {
+                        viewModel.startMonitoring()  // ✅ 선택된 센서들 활성화!
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(viewModel.selectedSensors.isEmpty)  // 센서가 선택되지 않으면 비활성화
                 }
-                .frame(maxWidth: .infinity)
                 
-                VStack {
-                    Text("Y축")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(reading.y)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
-                
-                VStack {
-                    Text("Z축")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(reading.z)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.blue.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
-struct BatteryDataCard: View {
-    let reading: BatteryData
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "battery.75")
-                    .foregroundColor(batteryColor)
-                Text("배터리 레벨")
-                    .font(.headline)
                 Spacer()
-                Text("\(reading.level)%")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(batteryColor)
+                
+                // 현재 상태 표시
+                if viewModel.isMonitoringActive {
+                    HStack {
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 8, height: 8)
+                        Text("활성화됨")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                }
             }
-            .frame(maxWidth: .infinity)
             
-            ProgressView(value: Double(reading.level), total: 100.0)
-                .progressViewStyle(LinearProgressViewStyle(tint: batteryColor))
-                .frame(maxWidth: .infinity)
-            
-            Text("마지막 업데이트: \(timeFormatter.string(from: reading.timestamp))")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            // --- 선택된 센서 정보 표시 ---
+            if !viewModel.selectedSensors.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("선택된 센서:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text(viewModel.selectedSensors.map { $0.displayName }.joined(separator: ", "))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+            }
         }
-        .frame(maxWidth: .infinity)
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.gray.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(batteryColor.opacity(0.3), lineWidth: 1)
-                )
         )
     }
     
-    private var timeFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .medium
-        return formatter
-    }
-    
-    private var batteryColor: Color {
-        if reading.level > 50 {
-            return .green
-        } else if reading.level > 20 {
-            return .orange
+    // 3. 센서 토글 헬퍼 함수
+    private func toggleSensor(_ sensor: SensorKind) {
+        var newSelection = viewModel.selectedSensors
+        
+        if newSelection.contains(sensor) {
+            newSelection.remove(sensor)  // 이미 선택된 센서면 해제
         } else {
-            return .red
+            newSelection.insert(sensor)  // 선택되지 않은 센서면 추가
         }
+        
+        viewModel.updateSensorSelection(newSelection)  // 센서 선택 업데이트
+    }
+}
+
+// 4. 센서 토글 버튼 컴포넌트
+struct SensorToggleButton: View {
+    let title: String
+    let isSelected: Bool
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? color : .gray)
+                Text(title)
+                    .fontWeight(isSelected ? .semibold : .regular)
+                    .foregroundColor(isSelected ? color : .primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? color.opacity(0.1) : Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(isSelected ? color : Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// 5. 프리뷰
+struct SensorActivationSampleView_Previews: PreviewProvider {
+    static var previews: some View {
+        SensorActivationSampleView(bluetoothKit: BluetoothKitViewModel())
     }
 } 
-```
 
 ### 5. 수신된 센서 데이터 카드 생성 및 실시간 출력
 
