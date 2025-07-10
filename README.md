@@ -147,8 +147,8 @@ git pull origin develop
 5. "+" 선택 → BluetoothKit Package → BluetoothKit 선택 → Add 누르기
 
 #### 블루투스 권한 설정
-1. [프로젝트명] → Targets → [프로젝트명] → Info → Custom iOS Target Properties 
-2. "+" 선택후 아래 키 추가
+1. [프로젝트명] → Targets → [프로젝트명] → Info → Custom iOS Target Properties
+2. Key 목록 중 아무 항목 위에 커서를 올리면 나타나는 '+' 버튼을 클릭한 후, 아래의 키를 추가합니다.
    - Privacy - Bluetooth Always Usage Description
    - Privacy - Bluetooth Peripheral Usage Description
 
@@ -241,7 +241,7 @@ git pull origin develop
 
 ## 코드 예시
 
-### 기본 ContentView.swift 파일 설정
+### ContentView.swift 파일 설정
 
 ```swift
 import SwiftUI
@@ -405,7 +405,7 @@ struct ConnectionStatusView: View {
 }
 ```
 
-### 4. 센서 활성화 및 데이터 출력
+### 4. 센서 활성화 후, 수신 데이터를 콘솔에 실시간 출력
 
 ```swift
 import SwiftUI
@@ -571,7 +571,7 @@ struct SensorToggleButton: View {
 }
 ```
 
-### 5. 수신된 센서 데이터 카드 생성 및 실시간 출력
+### 5. 수신된 센서 데이터를 카드 형태로 앱 인터페이스에 실시간 출력
 
 ```swift
 import SwiftUI
