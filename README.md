@@ -268,6 +268,8 @@ struct ContentView: View {
 ### 1. 링크밴드 디바이스 Bluetooth 스캔
 
 ```swift
+import SwiftUI
+
 struct ScanControlView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
@@ -297,6 +299,8 @@ struct ScanControlView: View {
 ### 2. 스캔된 링크밴드 디바이스 목록 표시 및 연결
 
 ```swift
+import SwiftUI
+
 struct DeviceListView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
@@ -342,6 +346,8 @@ struct DeviceRow: View {
 ### 3. 블루투스 연결 상태 확인 및 연결 해제
 
 ```swift
+import SwiftUI
+
 struct ConnectionStatusView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
@@ -401,7 +407,7 @@ struct ConnectionStatusView: View {
 
 ### 4. 센서 활성화 및 데이터 출력
 
-```
+```swift
 import SwiftUI
 
 struct SensorActivationSampleView: View {
@@ -568,6 +574,8 @@ struct SensorToggleButton: View {
 ### 5. 수신된 센서 데이터 카드 생성 및 실시간 출력
 
 ```swift
+import SwiftUI
+
 struct SensorDataView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
@@ -894,6 +902,8 @@ struct BatteryDataCard: View {
 ### 6. 데이터 기록 (CSV 저장) 구현
 
 ```swift
+import SwiftUI
+
 struct RecordingControlView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
