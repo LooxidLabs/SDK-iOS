@@ -152,7 +152,7 @@ echo "SDKAdapter/" >> .git/info/sparse-checkout
 git pull origin develop
 ```
 
-### Xcode에서 추가
+### Xcode: 링크밴드 SDK 추가 및 권한 설정 가이드
 
 #### 링크밴드 SDK 추가
 1. File → Add Package Dependencies...
