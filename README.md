@@ -161,11 +161,13 @@ git pull origin develop
 4. [프로젝트명] → Targets → [프로젝트명] → General → Frameworks, Libraries, and Embedded Content
 5. "+" 선택 → BluetoothKit Package → BluetoothKit 선택 → Add 누르기
 
-#### 블루투스 권한 설정
+#### info.plist 권한 설정
 1. [프로젝트명] → Targets → [프로젝트명] → Info → Custom iOS Target Properties
 2. Key 목록 중 아무 항목 위에 커서를 올리면 나타나는 '+' 버튼을 클릭한 후, 아래의 키를 추가합니다.
    - Privacy - Bluetooth Always Usage Description
    - Privacy - Bluetooth Peripheral Usage Description
+   - Application supports iTunes file sharing -> Yes로 설정
+   - Supports opening documents in place -> Yes로 설정
 
 ## 핵심 기능
 
@@ -914,13 +916,17 @@ struct BatteryDataCard: View {
 
 ```swift
 import SwiftUI
+import Foundation
+
+// MARK: - 센서 데이터 기록 컨트롤 뷰
 
 struct RecordingControlView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     @State private var isAnimating = false
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
+            // 헤더 섹션
             HStack {
                 Image(systemName: bluetoothKit.isRecording ? "stop.circle.fill" : "record.circle")
                     .foregroundColor(bluetoothKit.isRecording ? .red : .blue)
@@ -937,15 +943,12 @@ struct RecordingControlView: View {
                         .foregroundColor(.red)
                         .opacity(isAnimating ? 0.3 : 1.0)
                         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isAnimating)
-                        .onAppear {
-                            isAnimating = true
-                        }
-                        .onDisappear {
-                            isAnimating = false
-                        }
+                        .onAppear { isAnimating = true }
+                        .onDisappear { isAnimating = false }
                 }
             }
             
+            // 기록 시작/중지 버튼
             Button(action: {
                 if bluetoothKit.isRecording {
                     bluetoothKit.stopRecording()
@@ -963,12 +966,42 @@ struct RecordingControlView: View {
                     .cornerRadius(8)
             }
             .disabled(!bluetoothKit.isConnected)
+            .opacity(bluetoothKit.isConnected ? 1.0 : 0.5)
             
-            // 기록 파일 디렉토리 표시
-            if bluetoothKit.isRecording {
-                Text("저장 위치: \(bluetoothKit.recordingsDirectory.path)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            
+            // 기록된 파일 목록
+            if !bluetoothKit.recordedFiles.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("기록된 파일")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text("저장 경로:파일->나의 iPhone->[프로젝트명]")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    // 최근 파일 3개만 표시, csv만
+                    ForEach(Array(bluetoothKit.recordedFiles.prefix(3).filter { $0.pathExtension.lowercased() == "csv" }), id: \.self) { file in
+                        HStack {
+                            Image(systemName: "doc.text")
+                                .foregroundColor(.blue)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(file.lastPathComponent)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                Text(formatFileDate(file))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(4)
+                    }
+                }
             }
         }
         .padding()
@@ -977,6 +1010,21 @@ struct RecordingControlView: View {
                 .opacity(0.1)
         )
         .cornerRadius(12)
+    }
+    
+    private func formatFileDate(_ file: URL) -> String {
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: file.path)
+            if let creationDate = attributes[.creationDate] as? Date {
+                let formatter = DateFormatter()
+                formatter.dateStyle = .short
+                formatter.timeStyle = .short
+                return formatter.string(from: creationDate)
+            }
+        } catch {
+            print("파일 날짜 가져오기 실패: \(error)")
+        }
+        return "날짜 없음"
     }
 }
 ```
