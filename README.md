@@ -256,7 +256,7 @@ git pull origin develop
 - ``BatchDataConfigurationViewModel/cancelSensorChange()`` - 센서 변경 취소
 - ``BatchDataConfigurationViewModel/showRecordingChangeWarning`` - 기록 중 변경 경고 상태
 
-## 코드 예시
+## 기본 설정 - 코드 예시
 
 ### ContentView.swift 파일 설정
 
