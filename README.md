@@ -608,7 +608,7 @@ struct SensorDataView: View {
             
             // 가속도계 데이터 표시
             if let accelReading = bluetoothKit.latestAccelerometerReading {
-                AccelerometerDataCard(reading: accelReading)
+                AccelerometerDataCard(reading: accelReading, bluetoothKit: bluetoothKit)
             }
             
             // 배터리 데이터 표시
@@ -625,7 +625,7 @@ struct EEGDataCard: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Image(systemName: "brain.head.profile")
+                Image(systemName: "brain")
                     .foregroundColor(.purple)
                     .font(.title2)
                 Text("EEG 데이터")
@@ -745,7 +745,7 @@ struct AccelerometerDataCard: View {
             // 헤더 섹션
             VStack(spacing: 8) {
                 HStack {
-                    Image(systemName: "move.3d")
+                    Image(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                         .foregroundColor(.blue)
                         .font(.title2)
                     Text("ACC")
@@ -911,7 +911,6 @@ struct BatteryDataCard: View {
         }
     }
 }
-
 ```
 
 ### 6. 데이터 기록 (CSV 저장) 구현
@@ -921,6 +920,7 @@ import SwiftUI
 
 struct RecordingControlView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: 8) {
@@ -938,7 +938,14 @@ struct RecordingControlView: View {
                 if bluetoothKit.isRecording {
                     Image(systemName: "circle.fill")
                         .foregroundColor(.red)
-                        .symbolEffect(.pulse)
+                        .opacity(isAnimating ? 0.3 : 1.0)
+                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isAnimating)
+                        .onAppear {
+                            isAnimating = true
+                        }
+                        .onDisappear {
+                            isAnimating = false
+                        }
                 }
             }
             
