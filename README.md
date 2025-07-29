@@ -74,8 +74,8 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 
 ## 기술 스택
 
-- **언어**: Swift 6.1+
-- **최소 지원 버전**: iOS 13.0+, macOS 10.15+
+- **언어**: Swift 5+
+- **최소 지원 버전**: Xcode 16.4+, iOS 18.4+, macOS 15.5+
 - **패키지 관리**: Swift Package Manager
 - **아키텍처**: 
   - SDK: 순수 비즈니스 로직 (UI 독립적)
