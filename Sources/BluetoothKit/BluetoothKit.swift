@@ -49,7 +49,7 @@ public protocol BluetoothKitDelegate: AnyObject {
 /// bluetoothKit.delegate = self
 ///
 /// // 1. 디바이스 스캔
-/// bluetoothKit.startScanning()
+/// bluetoothKit.startScan()
 ///
 /// // 2. 디바이스 연결
 /// if let device = bluetoothKit.discoveredDevices.first {
@@ -136,9 +136,9 @@ public class BluetoothKit: @unchecked Sendable {
     /// ```swift
     /// // 스캔 상태에 따른 UI 표시
     /// if bluetoothKit.isScanning {
-    ///     Button("중지") { bluetoothKit.stopScanning() }
+    ///     Button("중지") { bluetoothKit.stopScan() }
     /// } else {
-    ///     Button("스캔 시작") { bluetoothKit.startScanning() }
+    ///     Button("스캔 시작") { bluetoothKit.startScan() }
     /// }
     /// ```
     private(set) public var isScanning: Bool = false {
@@ -508,7 +508,7 @@ public class BluetoothKit: @unchecked Sendable {
     /// ## 예시
     /// ```swift
     /// let bluetoothKit = BluetoothKit()
-    /// bluetoothKit.startScanning()
+    /// bluetoothKit.startScan()
     /// ```
     public init() {
         self.configuration = .default
@@ -536,20 +536,20 @@ public class BluetoothKit: @unchecked Sendable {
     ///
     /// ## 예시
     /// ```swift
-    /// bluetoothKit.startScanning()
+    /// bluetoothKit.startScan()
     /// ```
-    public func startScanning() {
-        bluetoothManager.startScanning()
+    public func startScan() {
+        bluetoothManager.startScan()
     }
     
     /// Bluetooth 디바이스 스캔을 중지합니다.
     ///
     /// ## 예시
     /// ```swift
-    /// bluetoothKit.stopScanning()
+    /// bluetoothKit.stopScan()
     /// ```
-    public func stopScanning() {
-        bluetoothManager.stopScanning()
+    public func stopScan() {
+        bluetoothManager.stopScan()
     }
     
     /// 특정 Bluetooth 디바이스에 연결합니다.

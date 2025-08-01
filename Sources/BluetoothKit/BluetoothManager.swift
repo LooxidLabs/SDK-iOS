@@ -20,7 +20,7 @@ import CoreBluetooth
 /// let bluetoothManager = BluetoothManager(configuration: config, logger: logger)
 /// bluetoothManager.delegate = self
 /// bluetoothManager.sensorDataDelegate = self
-/// bluetoothManager.startScanning()
+/// bluetoothManager.startScan()
 /// ```
 internal class BluetoothManager: NSObject, @unchecked Sendable {
     
@@ -99,7 +99,7 @@ internal class BluetoothManager: NSObject, @unchecked Sendable {
     ///
     /// 설정된 디바이스 이름 접두사와 일치하는 디바이스만 검색됩니다.
     /// Bluetooth가 비활성화된 경우 스캔이 실패할 수 있습니다.
-    public func startScanning() {
+    public func startScan() {
         guard centralManager.state == .poweredOn else {
             log("Cannot start scanning: Bluetooth not available")
             connectionState = .failed(BluetoothKitError.bluetoothUnavailable)
@@ -113,7 +113,7 @@ internal class BluetoothManager: NSObject, @unchecked Sendable {
     }
     
     /// Bluetooth 디바이스 스캔을 중지합니다.
-    public func stopScanning() {
+    public func stopScan() {
         centralManager.stopScan()
         if case .scanning = connectionState {
             connectionState = .disconnected
@@ -130,7 +130,7 @@ internal class BluetoothManager: NSObject, @unchecked Sendable {
             return
         }
         
-        stopScanning()
+        stopScan()
         connectionState = .connecting(device.name)
         centralManager.connect(device.peripheral, options: nil)
     }

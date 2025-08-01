@@ -180,7 +180,7 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     // MARK: - Published Properties (UI 바인딩용)
     
     /// 스캔 중 발견된 Bluetooth 디바이스 목록
-    @Published public var discoveredDevices: [DeviceInfo] = []
+    @Published public var scannedDevices: [DeviceInfo] = []
     
     /// 현재 연결 상태의 사용자 친화적인 설명
     @Published public var connectionStatusDescription: String = "연결 안됨"
@@ -245,17 +245,17 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     // MARK: - Public Interface (SDK 메서드들을 래핑)
     
     /// Bluetooth 디바이스 스캔을 시작합니다.
-    public func startScanning() {
-        try? bluetoothKit.startScanning()
+    public func startScan() {
+        try? bluetoothKit.startScan()
     }
     
     /// Bluetooth 디바이스 스캔을 중지합니다.
-    public func stopScanning() {
-        try? bluetoothKit.stopScanning()
+    public func stopScan() {
+        try? bluetoothKit.stopScan()
     }
     
     /// 특정 Bluetooth 디바이스에 연결합니다.
-    public func connect(to device: DeviceInfo) {
+    public func connectToDevice(_ device: DeviceInfo) {
         // DeviceInfo를 BluetoothDevice로 변환해서 연결
         if let sdkDevice = bluetoothKit.discoveredDevices.first(where: { $0.name == device.name }) {
             try? bluetoothKit.connect(to: sdkDevice)
@@ -265,6 +265,16 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     /// 현재 연결된 디바이스에서 연결을 해제합니다.
     public func disconnect() {
         try? bluetoothKit.disconnect()
+    }
+    
+    /// 자동 재연결을 활성화합니다.
+    public func enableAutoReconnect() {
+        try? bluetoothKit.setAutoReconnect(enabled: true)
+    }
+    
+    /// 자동 재연결을 비활성화합니다.
+    public func disableAutoReconnect() {
+        try? bluetoothKit.setAutoReconnect(enabled: false)
     }
     
     /// 센서 데이터를 파일로 기록하기 시작합니다.
@@ -333,15 +343,15 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     
     // MARK: - Sensor Monitoring Control
     
-    /// 센서 모니터링을 활성화합니다.
+    /// 선택된 센서들을 시작합니다.
     /// - Note: 일반적인 실시간 모니터링을 시작합니다.
-    public func enableMonitoring() {
+    public func startSelectedSensors() {
         try? bluetoothKit.enableMonitoring()
     }
     
-    /// 센서 모니터링을 비활성화합니다.
+    /// 선택된 센서들을 중지합니다.
     /// - Note: 실시간 모니터링을 중지합니다.
-    public func disableMonitoring() {
+    public func stopSelectedSensors() {
         try? bluetoothKit.disableMonitoring()
     }
     
@@ -372,7 +382,7 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     /// SDK의 초기 상태를 ViewModel에 동기화합니다.
     private func syncInitialState() {
         // 초기값들을 SDK에서 가져와서 설정
-        discoveredDevices = bluetoothKit.discoveredDevices.map { DeviceInfo(from: $0) }
+        scannedDevices = bluetoothKit.discoveredDevices.map { DeviceInfo(from: $0) }
         connectionStatusDescription = bluetoothKit.connectionStatusDescription
         isScanning = bluetoothKit.isScanning
         isRecording = bluetoothKit.isRecording
@@ -399,7 +409,7 @@ extension BluetoothKitViewModel {
     
     /// 디바이스 목록이 업데이트되었을 때 호출
     func bluetoothKit(_ kit: BluetoothKit, didUpdateDevices devices: [BluetoothDevice]) {
-        discoveredDevices = devices.map { DeviceInfo(from: $0) }
+        scannedDevices = devices.map { DeviceInfo(from: $0) }
     }
     
     /// 연결 상태가 변경되었을 때 호출
