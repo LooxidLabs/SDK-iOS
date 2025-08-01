@@ -257,7 +257,7 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     /// 특정 Bluetooth 디바이스에 연결합니다.
     public func connectToDevice(_ device: DeviceInfo) {
         // DeviceInfo를 BluetoothDevice로 변환해서 연결
-        if let sdkDevice = bluetoothKit.discoveredDevices.first(where: { $0.name == device.name }) {
+        if let sdkDevice = bluetoothKit.scannedDevices.first(where: { $0.name == device.name }) {
             try? bluetoothKit.connect(to: sdkDevice)
         }
     }
@@ -382,7 +382,7 @@ class BluetoothKitViewModel: ObservableObject, BluetoothKitDelegate {
     /// SDK의 초기 상태를 ViewModel에 동기화합니다.
     private func syncInitialState() {
         // 초기값들을 SDK에서 가져와서 설정
-        scannedDevices = bluetoothKit.discoveredDevices.map { DeviceInfo(from: $0) }
+        scannedDevices = bluetoothKit.scannedDevices.map { DeviceInfo(from: $0) }
         connectionStatusDescription = bluetoothKit.connectionStatusDescription
         isScanning = bluetoothKit.isScanning
         isRecording = bluetoothKit.isRecording
