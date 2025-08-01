@@ -319,12 +319,12 @@ struct DeviceListView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
     
     var body: some View {
-        if !bluetoothKit.discoveredDevices.isEmpty {
+        if !bluetoothKit.scannedDevices.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text("발견된 디바이스")
                     .font(.headline)
                 
-                ForEach(bluetoothKit.discoveredDevices, id: \.id) { device in
+                ForEach(bluetoothKit.scannedDevices, id: \.id) { device in
                     DeviceRow(device: device, bluetoothKit: bluetoothKit)
                 }
             }
