@@ -345,7 +345,7 @@ struct DeviceRow: View {
             Spacer()
             
             Button("연결") {
-                bluetoothKit.connectToDevice(device)
+                bluetoothKit.connect(to: device)
             }
             .buttonStyle(.bordered)
             .tint(.blue)
