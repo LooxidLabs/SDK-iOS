@@ -180,7 +180,7 @@ git pull origin develop
 - ``DeviceInfo`` - Bluetooth 디바이스 정보 구조체
 
 ### 3. 디바이스 연결 관리
-- ``BluetoothKitViewModel/connectToDevice(_:)`` - 특정 디바이스에 연결
+- ``BluetoothKitViewModel/connect(to:)`` - 특정 디바이스에 연결
 - ``BluetoothKitViewModel/disconnect()`` - 현재 연결된 디바이스에서 연결 해제
 - ``BluetoothKitViewModel/connectionState`` - 현재 연결 상태
 - ``BluetoothKitViewModel/isConnected`` - 연결 상태 확인
@@ -246,12 +246,18 @@ git pull origin develop
 #### 6. 예상 값 계산
 - ``BatchDataConfigurationViewModel/getExpectedTime(for:sampleCount:)`` - 샘플 수 기반 예상 수집 시간
 - ``BatchDataConfigurationViewModel/getExpectedSamples(for:seconds:)`` - 시간 기반 예상 샘플 수
+- ``BatchDataConfigurationViewModel/getExpectedSamplesForMinutes(for:minutes:)`` - 시간(분) 기반 예상 샘플 수
 - ``BatchDataConfigurationViewModel/getExpectedMinutes(for:sampleCount:)`` - 샘플 수 기반 예상 수집 시간(분)
 
 #### 7. 기록 중 설정 변경 처리
 - ``BatchDataConfigurationViewModel/confirmSensorChangeWithRecordingStop()`` - 기록 중지 후 센서 변경 확인
 - ``BatchDataConfigurationViewModel/cancelSensorChange()`` - 센서 변경 취소
 - ``BatchDataConfigurationViewModel/showRecordingChangeWarning`` - 기록 중 변경 경고 상태
+
+#### 8. 추가 기능
+- ``BatchDataConfigurationViewModel/resetToDefaults()`` - 모든 설정을 기본값으로 재설정
+- ``BatchDataConfigurationViewModel/getConfigurationSummary()`` - 현재 설정 요약 정보
+- ``BatchDataConfigurationViewModel/updateAccelerometerMode(_:)`` - 가속도계 모드 업데이트
 
 ## 기본 설정 - 코드 예시
 
@@ -1022,7 +1028,6 @@ struct RecordingControlView: View {
 }
 ```
 
-
 ## 고급 설정 - 배치 데이터 수집 코드 예시
 
 ### BatchDataConfigurationViewModel 생성 및 설정
@@ -1196,7 +1201,7 @@ struct SensorConfigurationView: View {
                 .onChange(of: batchViewModel.getSampleCountText(for: sensor)) { newValue in
                     if batchViewModel.validateSampleCount(newValue, for: sensor) {
                         let intValue = Int(newValue) ?? 100
-                        batchViewModel.updateSensorSampleCount(newValue, count: intValue, text: sensor)
+                        batchViewModel.updateSensorSampleCount(sensor, count: intValue, text: newValue)
                     }
                 }
             
@@ -1218,7 +1223,7 @@ struct SensorConfigurationView: View {
                 .onChange(of: batchViewModel.getSecondsText(for: sensor)) { newValue in
                     if batchViewModel.validateSeconds(newValue, for: sensor) {
                         let intValue = Int(newValue) ?? 30
-                        batchViewModel.updateSensorSeconds(newValue, seconds: intValue, text: sensor)
+                        batchViewModel.updateSensorSeconds(sensor, seconds: intValue, text: newValue)
                     }
                 }
             
@@ -1243,7 +1248,7 @@ struct SensorConfigurationView: View {
                 .onChange(of: batchViewModel.getMinutesText(for: sensor)) { newValue in
                     if batchViewModel.validateMinutes(newValue, for: sensor) {
                         let intValue = Int(newValue) ?? 1
-                        batchViewModel.updateSensorMinutes(newValue, minutes: intValue, text: sensor)
+                        batchViewModel.updateSensorMinutes(sensor, minutes: intValue, text: newValue)
                     }
                 }
             
@@ -1314,7 +1319,7 @@ struct ValidationErrorView: View {
 ### 기본 워크플로우
 1. **스캔 시작**: ``BluetoothKitViewModel/startScan()``
 2. **디바이스 목록 확인**: ``BluetoothKitViewModel/scannedDevices``
-3. **디바이스 연결**: ``BluetoothKitViewModel/connectToDevice(_:)``
+3. **디바이스 연결**: ``BluetoothKitViewModel/connect(to:)``
 4. **센서 모니터링 시작**: ``BluetoothKitViewModel/startSelectedSensors()``
 5. **데이터 기록 시작**: ``BluetoothKitViewModel/startRecording()``
 6. **기록 중지**: ``BluetoothKitViewModel/stopRecording()``
