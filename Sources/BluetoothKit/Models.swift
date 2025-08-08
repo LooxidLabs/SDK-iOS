@@ -328,6 +328,32 @@ public enum ConnectionState: Sendable, Equatable {
     case failed(Error)
     
     /// 연결 상태의 사용자 친화적인 한국어 설명입니다.
+    ///
+    /// **⚠️ Deprecated: 이 프로퍼티는 향후 제거될 예정입니다.**
+    /// 연결 상태 텍스트를 커스터마이징하려면 `BluetoothKitViewModel.connectionStatusTexts`를 사용하세요.
+    ///
+    /// ## 마이그레이션 가이드
+    /// ```swift
+    /// // ❌ 더 이상 권장하지 않음
+    /// let statusText = connectionState.description
+    /// 
+    /// // ✅ 권장하는 방법 - 기본 한국어 사용
+    /// let statusText = viewModel.connectionStatusDescription
+    /// 
+    /// // ✅ 영어로 변경
+    /// viewModel.connectionStatusTexts = ConnectionStatusTexts(
+    ///     disconnected: "Disconnected",
+    ///     scanning: "Scanning...",
+    ///     connecting: { "Connecting to \($0)..." },
+    ///     connected: { "Connected to \($0)" },
+    ///     reconnecting: { "Reconnecting to \($0)..." },
+    ///     failed: { "Failed: \($0)" }
+    /// )
+    /// 
+    /// // ✅ 기본 한국어로 복원
+    /// viewModel.connectionStatusTexts = .defaultKorean()
+    /// ```
+    @available(*, deprecated, message: "연결 상태 텍스트 커스터마이징은 BluetoothKitViewModel.connectionStatusTexts를 사용하세요")
     public var description: String {
         switch self {
         case .disconnected:
