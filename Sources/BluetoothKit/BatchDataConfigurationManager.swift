@@ -18,8 +18,6 @@ internal protocol BatchDataConfigurationManagerDelegate: AnyObject {
     func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdatePendingConfigurationChange change: BatchDataConfigurationManager.PendingConfigurationChange?)
     /// 센서 설정이 변경되었을 때 호출
     func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateSensorConfigurations configurations: [SensorType: BatchDataConfigurationManager.SensorConfiguration])
-    /// 기록 중 센서 업데이트가 필요할 때 호출
-    func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, needsUpdateRecordingSensors sensors: Set<SensorType>)
 }
 
 /// 배치 데이터 수집 설정을 관리하는 비즈니스 로직 클래스
@@ -465,11 +463,6 @@ public class BatchDataConfigurationManager {
     /// 변경사항 적용
     private func applyChanges() {
         self.setupBatchDelegate()
-        
-        if self.bluetoothKit.isRecording {
-            // delegate를 통해 BluetoothKit에 센서 업데이트 요청
-            delegate?.batchDataConfigurationManager(self, needsUpdateRecordingSensors: self.selectedSensors)
-        }
         
         self.configureAllSensors()
     }

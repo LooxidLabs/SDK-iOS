@@ -617,22 +617,6 @@ public class BluetoothKit: @unchecked Sendable {
         dataRecorder.stopRecording()
     }
     
-    /// 기록 중에 선택된 센서를 업데이트합니다.
-    ///
-    /// 기록 중이 아닌 경우 아무 작업도 수행하지 않습니다.
-    /// 새로 선택된 센서만 향후 데이터가 기록됩니다.
-    ///
-    /// - Parameter selectedSensors: 기록할 센서 타입들의 집합
-    ///
-    /// ## 예시
-    /// ```swift
-    /// // 기록 중에 센서 선택 변경
-    /// bluetoothKit.updateRecordingSensors([.eeg, .accelerometer])
-    /// ```
-    public func updateRecordingSensors(_ selectedSensors: Set<SensorType>) {
-        dataRecorder.updateSelectedSensors(selectedSensors)
-    }
-    
     /// 기록된 파일들의 URL 목록을 반환합니다.
     ///
     /// - Returns: 문서 디렉토리에 저장된 모든 기록 파일들의 URL 배열
@@ -650,65 +634,6 @@ public class BluetoothKit: @unchecked Sendable {
     /// ```
     public func getRecordedFiles() -> [URL] {
         return dataRecorder.getRecordedFiles()
-    }
-    
-    /// EEG 데이터를 직접 기록합니다.
-    ///
-    /// 일반적으로 자동으로 기록되지만, 커스텀 데이터 처리 후 수동으로 기록할 때 사용합니다.
-    ///
-    /// - Parameter readings: 기록할 EEG 읽기값 배열
-    ///
-    /// ## 예시
-    /// ```swift
-    /// let processedReadings = filterEEGData(originalReadings)
-    /// bluetoothKit.recordEEGData(processedReadings)
-    /// ```
-    public func recordEEGData(_ readings: [EEGReading]) {
-        dataRecorder.recordEEGData(readings)
-    }
-    
-    /// PPG 데이터를 직접 기록합니다.
-    ///
-    /// 일반적으로 자동으로 기록되지만, 커스텀 데이터 처리 후 수동으로 기록할 때 사용합니다.
-    ///
-    /// - Parameter readings: 기록할 PPG 읽기값 배열
-    ///
-    /// ## 예시
-    /// ```swift
-    /// let processedReadings = filterPPGData(originalReadings)
-    /// bluetoothKit.recordPPGData(processedReadings)
-    /// ```
-    public func recordPPGData(_ readings: [PPGReading]) {
-        dataRecorder.recordPPGData(readings)
-    }
-    
-    /// 가속도계 데이터를 직접 기록합니다.
-    ///
-    /// 일반적으로 자동으로 기록되지만, 커스텀 데이터 처리 후 수동으로 기록할 때 사용합니다.
-    ///
-    /// - Parameter readings: 기록할 가속도계 읽기값 배열
-    ///
-    /// ## 예시
-    /// ```swift
-    /// let processedReadings = filterAccelerometerData(originalReadings)
-    /// bluetoothKit.recordAccelerometerData(processedReadings)
-    /// ```
-    public func recordAccelerometerData(_ readings: [AccelerometerReading]) {
-        dataRecorder.recordAccelerometerData(readings)
-    }
-    
-    /// 배터리 데이터를 직접 기록합니다.
-    ///
-    /// 일반적으로 자동으로 기록되지만, 수동으로 기록할 때 사용합니다.
-    ///
-    /// - Parameter reading: 기록할 배터리 읽기값
-    ///
-    /// ## 예시
-    /// ```swift
-    /// bluetoothKit.recordBatteryData(batteryReading)
-    /// ```
-    public func recordBatteryData(_ reading: BatteryReading) {
-        dataRecorder.recordBatteryData(reading)
     }
     
     /// 데이터 기록 이벤트를 처리하는 델리게이트입니다.
@@ -1512,7 +1437,6 @@ extension BluetoothKit {
 
 @available(iOS 13.0, macOS 10.15, *)
 extension BluetoothKit: BatchDataConfigurationManagerDelegate {
-    
     internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateCollectionMode mode: BatchDataConfigurationManager.CollectionMode) {
         // 내부적으로 처리, 외부 delegate에는 필요시 전달
     }
@@ -1540,10 +1464,5 @@ extension BluetoothKit: BatchDataConfigurationManagerDelegate {
     
     internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateSensorConfigurations configurations: [SensorType: BatchDataConfigurationManager.SensorConfiguration]) {
         // 내부적으로 처리, 외부 delegate에는 필요시 전달
-    }
-    
-    internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, needsUpdateRecordingSensors sensors: Set<SensorType>) {
-        // 기록 중 센서 업데이트 요청을 받아서 실제 updateRecordingSensors 호출
-        updateRecordingSensors(sensors)
     }
 } 
