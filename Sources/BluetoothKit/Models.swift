@@ -58,7 +58,14 @@ public enum AccelerometerMode: CaseIterable {
 ///     bluetoothKit.connect(to: device)
 /// }
 /// ```
-public struct BluetoothDevice: @unchecked Sendable {
+public struct BluetoothDevice: Identifiable, Equatable, @unchecked Sendable {
+    /// SwiftUI에서 사용되는 고유 식별자입니다.
+    ///
+    /// CBPeripheral의 identifier와 동일한 값으로, SwiftUI의 ForEach 등에서 사용됩니다.
+    public var id: UUID {
+        return peripheral.identifier
+    }
+    
     /// Core Bluetooth 페리페럴 객체입니다.
     ///
     /// 실제 BLE 통신을 위해 사용되는 CBPeripheral 인스턴스입니다.
@@ -71,6 +78,14 @@ public struct BluetoothDevice: @unchecked Sendable {
     /// BLE 광고에서 가져온 디바이스 이름 또는 사용자 정의 이름입니다.
     /// 일반적으로 "LXB-" 접두사를 가진 형태입니다.
     public let name: String
+    
+    /// 디바이스의 고유 식별자입니다.
+    ///
+    /// CBPeripheral의 identifier와 동일한 값으로, 디바이스를 고유하게 식별하는 데 사용됩니다.
+    /// 어댑터에서 DeviceInfo 변환 시 사용할 수 있습니다.
+    public var identifier: UUID {
+        return peripheral.identifier
+    }
     
     /// 새로운 BluetoothDevice 인스턴스를 생성합니다.
     ///
@@ -85,7 +100,7 @@ public struct BluetoothDevice: @unchecked Sendable {
     /// 두 BluetoothDevice가 동일한지 비교합니다.
     ///
     /// 페리페럴의 식별자를 기준으로 동등성을 판단합니다.
-    internal static func == (lhs: BluetoothDevice, rhs: BluetoothDevice) -> Bool {
+    public static func == (lhs: BluetoothDevice, rhs: BluetoothDevice) -> Bool {
         return lhs.peripheral.identifier == rhs.peripheral.identifier
     }
 }

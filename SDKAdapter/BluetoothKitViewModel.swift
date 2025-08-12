@@ -110,12 +110,10 @@ internal extension BatteryData {
 internal extension DeviceInfo {
     /// SDK의 BluetoothDevice를 DeviceInfo로 변환하는 이니셜라이저
     /// - Parameter device: 변환할 SDK BluetoothDevice 객체
-    /// - Note: 현재는 임시 UUID를 생성하며, SDK에서 proper identifier 제공이 필요합니다.
+    /// - Note: BluetoothDevice의 identifier 프로퍼티를 사용하여 proper UUID를 제공합니다.
     init(from device: BluetoothDevice) {
-        // peripheral.identifier에 접근할 수 없으므로 name을 UUID로 사용
-        // 실제로는 BluetoothKit에서 proper UUID를 제공해야 함
         self.init(
-            id: UUID(), // 임시 UUID 생성 - SDK에서 proper identifier 제공 필요
+            id: device.identifier, // BluetoothDevice의 proper identifier 사용
             name: device.name
         )
     }
