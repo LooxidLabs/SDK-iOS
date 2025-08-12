@@ -898,7 +898,7 @@ public class BluetoothKit: @unchecked Sendable {
         guard let config = dataCollectionConfigs[.eeg] else { return }
         
         switch config.mode {
-        case .timeInterval(let interval):
+        case .timeInterval(_):
             // 시간 기반 모드: TimeBatchManager 사용
             if let timeBatchManager = eegTimeBatchManager,
                let batch = timeBatchManager.addSample(reading) {
@@ -927,7 +927,7 @@ public class BluetoothKit: @unchecked Sendable {
         guard let config = dataCollectionConfigs[.ppg] else { return }
         
         switch config.mode {
-        case .timeInterval(let interval):
+        case .timeInterval(_):
             // 시간 기반 모드: TimeBatchManager 사용
             if let timeBatchManager = ppgTimeBatchManager,
                let batch = timeBatchManager.addSample(reading) {
@@ -956,7 +956,7 @@ public class BluetoothKit: @unchecked Sendable {
         guard let config = dataCollectionConfigs[.accelerometer] else { return }
         
         switch config.mode {
-        case .timeInterval(let interval):
+        case .timeInterval(_):
             // 시간 기반 모드: TimeBatchManager 사용
             if let timeBatchManager = accelerometerTimeBatchManager,
                let batch = timeBatchManager.addSample(reading) {

@@ -62,6 +62,7 @@ public struct BluetoothDevice: Identifiable, Equatable, @unchecked Sendable {
     /// SwiftUI에서 사용되는 고유 식별자입니다.
     ///
     /// CBPeripheral의 identifier와 동일한 값으로, SwiftUI의 ForEach 등에서 사용됩니다.
+    /// 어댑터에서 DeviceInfo 변환 시에도 이 프로퍼티를 사용할 수 있습니다.
     public var id: UUID {
         return peripheral.identifier
     }
@@ -78,14 +79,6 @@ public struct BluetoothDevice: Identifiable, Equatable, @unchecked Sendable {
     /// BLE 광고에서 가져온 디바이스 이름 또는 사용자 정의 이름입니다.
     /// 일반적으로 "LXB-" 접두사를 가진 형태입니다.
     public let name: String
-    
-    /// 디바이스의 고유 식별자입니다.
-    ///
-    /// CBPeripheral의 identifier와 동일한 값으로, 디바이스를 고유하게 식별하는 데 사용됩니다.
-    /// 어댑터에서 DeviceInfo 변환 시 사용할 수 있습니다.
-    public var identifier: UUID {
-        return peripheral.identifier
-    }
     
     /// 새로운 BluetoothDevice 인스턴스를 생성합니다.
     ///
