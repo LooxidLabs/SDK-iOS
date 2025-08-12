@@ -189,30 +189,44 @@ internal class SensorDataParser: @unchecked Sendable {
         let bytes = [UInt8](data)
         
         let headerSize = 4
-        let sampleSize = 6
+        let sampleSize = configuration.accelerometerSampleSize
         
+        // 최소 패킷 크기 확인 (헤더 + 최소 하나의 샘플)
         guard bytes.count >= headerSize + sampleSize else {
-            throw BluetoothKitError.dataParsingFailed("ACCEL 패킷이 너무 짧습니다: \(bytes.count) bytes")
+            throw BluetoothKitError.dataParsingFailed("ACCEL 패킷이 너무 짧습니다: \(bytes.count) bytes (최소: \(headerSize + sampleSize))")
+        }
+        
+        // 실제 이용 가능한 샘플 수 계산
+        let dataWithoutHeader = bytes.count - headerSize
+        let actualSampleCount = dataWithoutHeader / sampleSize
+        let expectedSampleCount = (configuration.accelerometerPacketSize - headerSize) / sampleSize
+        
+        // 패킷 크기가 예상과 다른 경우 로그 출력 (EEG/PPG와 동일한 패턴)
+        if bytes.count != configuration.accelerometerPacketSize {
+            print("⚠️ ACCEL 패킷 크기: \(bytes.count) bytes (예상: \(configuration.accelerometerPacketSize)), \(actualSampleCount) 샘플 처리 중 (예상: \(expectedSampleCount))")
         }
         
         // 패킷 헤더에서 타임스탬프 추출
         let timeRaw = UInt32(bytes[3]) << 24 | UInt32(bytes[2]) << 16 | UInt32(bytes[1]) << 8 | UInt32(bytes[0])
         var timestamp = Double(timeRaw) / configuration.timestampDivisor / configuration.millisecondsToSeconds
 
-        let dataWithoutHeaderCount = bytes.count - headerSize
-        guard dataWithoutHeaderCount >= sampleSize else {
-            throw BluetoothKitError.dataParsingFailed("ACCEL 패킷에 헤더는 있지만 한 개 샘플에 대한 충분한 데이터가 없습니다")
-        }
-        
-        let sampleCount = dataWithoutHeaderCount / sampleSize
         var readings: [AccelerometerReading] = []
+        readings.reserveCapacity(min(actualSampleCount, expectedSampleCount))  // 성능 최적화
 
-        for i in 0..<sampleCount {
-            let baseInFullPacket = headerSize + (i * sampleSize)
-            // 하드웨어 사양에 따라 홀수 번째 바이트 사용
-            let x = Int16(bytes[baseInFullPacket + 1])  // data[i+1]
-            let y = Int16(bytes[baseInFullPacket + 3])  // data[i+3] 
-            let z = Int16(bytes[baseInFullPacket + 5])  // data[i+5]
+        // 이용 가능한 샘플만 파싱 (파이썬과 동일한 방식)
+        for sampleIndex in 0..<actualSampleCount {
+            let i = headerSize + (sampleIndex * sampleSize)
+            
+            // 배열 경계를 넘지 않도록 확인
+            guard i + sampleSize <= bytes.count else {
+                print("⚠️ ACCEL 샘플 \(sampleIndex + 1) 불완전, 나머지 샘플 건너뜀")
+                break
+            }
+            
+            // 파이썬과 동일한 방식: 홀수 번째 바이트만 사용 (1바이트 값)
+            let x = Int16(bytes[i + 1])  // data[i+1]
+            let y = Int16(bytes[i + 3])  // data[i+3] 
+            let z = Int16(bytes[i + 5])  // data[i+5]
             
             let reading = AccelerometerReading(
                 x: x,

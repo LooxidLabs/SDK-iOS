@@ -457,8 +457,10 @@ internal struct SensorConfiguration: Sendable {
     internal let millisecondsToSeconds: Double = 1000.0
     internal let eegPacketSize: Int = 179
     internal let ppgPacketSize: Int = 172
+    internal let accelerometerPacketSize: Int = 184  // 파이썬과 동일하게 추가
     internal let eegSampleSize: Int = 7
     internal let ppgSampleSize: Int = 6
+    internal let accelerometerSampleSize: Int = 6    // 명시적으로 추가
     
     /// LXB- 디바이스용 기본 설정을 생성합니다.
     internal init() {
