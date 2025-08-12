@@ -370,21 +370,6 @@ public class BluetoothKit: @unchecked Sendable {
         return batchDataConfigurationManager.isMonitoringActive
     }
     
-    /// 경고 팝업 표시 상태
-    public var showBatchRecordingChangeWarning: Bool {
-        return batchDataConfigurationManager.showRecordingChangeWarning
-    }
-    
-    /// 펜딩된 센서 선택 (하위 호환성을 위해 유지)
-    public var batchPendingSensorSelection: Set<SensorType>? {
-        return batchDataConfigurationManager.pendingSensorSelection
-    }
-    
-    /// 펜딩된 설정 변경
-    public var batchPendingConfigurationChange: BatchDataConfigurationManager.PendingConfigurationChange? {
-        return batchDataConfigurationManager.pendingConfigurationChange
-    }
-    
     // MARK: - Batch Data Collection
     
     /// 배치 단위로 센서 데이터를 수신하는 델리게이트.
@@ -1084,16 +1069,6 @@ public class BluetoothKit: @unchecked Sendable {
         batchDataConfigurationManager.updateSensorSelection(sensors)
     }
     
-    /// 사용자가 경고 팝업에서 "기록 중지 후 변경"을 선택했을 때 호출합니다.
-    public func confirmBatchSensorChangeWithRecordingStop() {
-        batchDataConfigurationManager.confirmSensorChangeWithRecordingStop()
-    }
-    
-    /// 사용자가 경고 팝업에서 "취소"를 선택했을 때 호출합니다.
-    public func cancelBatchSensorChange() {
-        batchDataConfigurationManager.cancelSensorChange()
-    }
-    
     /// 배치 데이터 수집 모드를 업데이트합니다.
     public func updateBatchCollectionMode(_ mode: BatchDataConfigurationManager.CollectionMode) {
         batchDataConfigurationManager.updateCollectionMode(mode)
@@ -1448,18 +1423,6 @@ extension BluetoothKit: BatchDataConfigurationManagerDelegate {
     internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateMonitoringState isActive: Bool) {
         // BluetoothKitDelegate에게 배치 모니터링 상태 변화 알림
         delegate?.bluetoothKit(self, didUpdateBatchMonitoringState: isActive)
-    }
-    
-    internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateShowRecordingChangeWarning show: Bool) {
-        // 내부적으로 처리, 외부 delegate에는 필요시 전달
-    }
-    
-    internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdatePendingSensorSelection sensors: Set<SensorType>?) {
-        // 내부적으로 처리, 외부 delegate에는 필요시 전달
-    }
-    
-    internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdatePendingConfigurationChange change: BatchDataConfigurationManager.PendingConfigurationChange?) {
-        // 내부적으로 처리, 외부 delegate에는 필요시 전달
     }
     
     internal func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateSensorConfigurations configurations: [SensorType: BatchDataConfigurationManager.SensorConfiguration]) {

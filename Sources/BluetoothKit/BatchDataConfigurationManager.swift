@@ -10,12 +10,6 @@ internal protocol BatchDataConfigurationManagerDelegate: AnyObject {
     func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateSelectedSensors sensors: Set<SensorType>)
     /// 모니터링 상태가 변경되었을 때 호출
     func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateMonitoringState isActive: Bool)
-    /// 경고 팝업 표시 상태가 변경되었을 때 호출
-    func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateShowRecordingChangeWarning show: Bool)
-    /// 펜딩된 센서 선택이 변경되었을 때 호출
-    func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdatePendingSensorSelection sensors: Set<SensorType>?)
-    /// 펜딩된 설정 변경이 변경되었을 때 호출
-    func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdatePendingConfigurationChange change: BatchDataConfigurationManager.PendingConfigurationChange?)
     /// 센서 설정이 변경되었을 때 호출
     func batchDataConfigurationManager(_ manager: BatchDataConfigurationManager, didUpdateSensorConfigurations configurations: [SensorType: BatchDataConfigurationManager.SensorConfiguration])
 }
@@ -90,14 +84,6 @@ public class BatchDataConfigurationManager {
         static let minutes = 1...60
     }
     
-    /// 펜딩 중인 설정 변경 타입
-    public enum PendingConfigurationChange {
-        case sensorSelection(Set<SensorType>)
-        case sampleCount(value: Int, sensor: SensorType)
-        case seconds(value: Int, sensor: SensorType)
-        case minutes(value: Int, sensor: SensorType)
-    }
-    
     // MARK: - Properties (델리게이트 패턴으로 변경)
     
     /// 선택된 수집 모드
@@ -118,27 +104,6 @@ public class BatchDataConfigurationManager {
     private(set) public var isMonitoringActive = false {
         didSet {
             delegate?.batchDataConfigurationManager(self, didUpdateMonitoringState: isMonitoringActive)
-        }
-    }
-    
-    /// 경고 팝업 표시 상태
-    private(set) public var showRecordingChangeWarning = false {
-        didSet {
-            delegate?.batchDataConfigurationManager(self, didUpdateShowRecordingChangeWarning: showRecordingChangeWarning)
-        }
-    }
-    
-    /// 펜딩된 센서 선택 (하위 호환성을 위해 유지)
-    private(set) public var pendingSensorSelection: Set<SensorType>? {
-        didSet {
-            delegate?.batchDataConfigurationManager(self, didUpdatePendingSensorSelection: pendingSensorSelection)
-        }
-    }
-    
-    /// 펜딩된 설정 변경
-    private(set) public var pendingConfigurationChange: PendingConfigurationChange? {
-        didSet {
-            delegate?.batchDataConfigurationManager(self, didUpdatePendingConfigurationChange: pendingConfigurationChange)
         }
     }
     
@@ -190,50 +155,8 @@ public class BatchDataConfigurationManager {
     }
     
     public func updateSensorSelection(_ sensors: Set<SensorType>) {
-        // 기록 중이라면 경고 후 사용자 선택 요청
-        if isMonitoringActive && self.bluetoothKit.isRecording {
-            // UI에 경고 팝업 표시 요청
-            self.pendingConfigurationChange = .sensorSelection(sensors)
-            self.pendingSensorSelection = sensors  // 하위 호환성
-            self.showRecordingChangeWarning = true
-            return
-        }
-        
-        // 기록 중이 아니라면 즉시 적용
+        // 바로 적용 (기록 중 체크 제거)
         self.applySensorSelection(sensors)
-    }
-    
-    /// 사용자가 경고 팝업에서 "기록 중지 후 변경"을 선택했을 때 호출
-    public func confirmSensorChangeWithRecordingStop() {
-        guard let pendingChange = self.pendingConfigurationChange else { return }
-        
-        // 기록 중지
-        self.bluetoothKit.stopRecording()
-        
-        // 펜딩된 변경사항 적용
-        switch pendingChange {
-        case .sensorSelection(let sensors):
-            self.applySensorSelection(sensors)
-        case .sampleCount(let value, let sensor):
-            self.applySampleCountChange(value, for: sensor)
-        case .seconds(let value, let sensor):
-            self.applySecondsChange(value, for: sensor)
-        case .minutes(let value, let sensor):
-            self.applyMinutesChange(value, for: sensor)
-        }
-        
-        // 임시 저장 정리
-        self.pendingConfigurationChange = nil
-        self.pendingSensorSelection = nil
-        self.showRecordingChangeWarning = false
-    }
-    
-    /// 사용자가 경고 팝업에서 "취소"를 선택했을 때 호출
-    public func cancelSensorChange() {
-        // 임시 저장 정리
-        self.pendingConfigurationChange = nil
-        self.pendingSensorSelection = nil
-        self.showRecordingChangeWarning = false
     }
     
     /// 실제 센서 선택 적용 로직
@@ -301,43 +224,19 @@ public class BatchDataConfigurationManager {
     
     /// 특정 센서의 샘플 수를 설정
     public func setSampleCount(_ value: Int, for sensor: SensorType) {
-        // 기록 중이라면 경고 후 사용자 선택 요청
-        if isMonitoringActive && self.bluetoothKit.isRecording {
-            // UI에 경고 팝업 표시 요청 (설정 변경)
-            self.pendingConfigurationChange = .sampleCount(value: value, sensor: sensor)
-            self.showRecordingChangeWarning = true
-            return
-        }
-        
-        // 기록 중이 아니라면 즉시 적용
+        // 바로 적용 (기록 중 체크 제거)
         self.applySampleCountChange(value, for: sensor)
     }
     
     /// 특정 센서의 시간을 설정
     public func setSeconds(_ value: Int, for sensor: SensorType) {
-        // 기록 중이라면 경고 후 사용자 선택 요청
-        if isMonitoringActive && self.bluetoothKit.isRecording {
-            // UI에 경고 팝업 표시 요청 (설정 변경)
-            self.pendingConfigurationChange = .seconds(value: value, sensor: sensor)
-            self.showRecordingChangeWarning = true
-            return
-        }
-        
-        // 기록 중이 아니라면 즉시 적용
+        // 바로 적용 (기록 중 체크 제거)
         self.applySecondsChange(value, for: sensor)
     }
     
     /// 특정 센서의 분을 설정
     public func setMinutes(_ value: Int, for sensor: SensorType) {
-        // 기록 중이라면 경고 후 사용자 선택 요청
-        if isMonitoringActive && self.bluetoothKit.isRecording {
-            // UI에 경고 팝업 표시 요청 (설정 변경)
-            self.pendingConfigurationChange = .minutes(value: value, sensor: sensor)
-            self.showRecordingChangeWarning = true
-            return
-        }
-        
-        // 기록 중이 아니라면 즉시 적용
+        // 바로 적용 (기록 중 체크 제거)
         self.applyMinutesChange(value, for: sensor)
     }
     
