@@ -618,15 +618,15 @@ struct SensorActivationSampleView: View {
             // --- 모니터링 제어 버튼 ---
             HStack(spacing: 12) {
                 if viewModel.isMonitoringActive {
-                    // 모니터링 중지 버튼
-                    Button("모니터링 중지") {
+                    // 센서 비활성화 버튼
+                    Button("센서 비활성화") {
                         viewModel.stopSelectedSensors()  // ✅ 센서 비활성화
                     }
                     .buttonStyle(.bordered)
                     .tint(.red)
                 } else {
-                    // 모니터링 시작 버튼 (핵심!)
-                    Button("모니터링 시작") {
+                    // 센서 활성화 버튼
+                    Button("센서 활성화") {
                         viewModel.startSelectedSensors()  // ✅ 선택된 센서들 활성화!
                     }
                     .buttonStyle(.borderedProminent)
