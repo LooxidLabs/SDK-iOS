@@ -2,9 +2,9 @@
 
 LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수집을 위한 iOS SDK 및 SwiftUI 어댑터입니다.
 
+> [!NOTE]
 > 데모 앱을 사용해보고 싶다면 아래 링크를 참고하세요:  
-
-🔗 https://github.com/LooxidLabs/iOS-LinkBandDemoApp.git  
+> 🔗 https://github.com/LooxidLabs/iOS-LinkBandDemoApp.git  
 
 ## 프로젝트 구성
 
@@ -22,8 +22,9 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 
 ## 🤔 왜 SDK Adapter를 사용해야 할까요?
 
-### **권장 사용법**: SDK Adapter 우선 사용
-대부분의 iOS 개발자는 **SDK를 직접 사용하지 말고 SDK Adapter를 사용하는 것을 권장**합니다.
+> [!IMPORTANT]
+> **권장 사용법**: SDK Adapter 우선 사용
+> 대부분의 iOS 개발자는 **SDK를 직접 사용하지 말고 SDK Adapter를 사용하는 것을 권장**합니다.
 
 ### 어댑터의 핵심 장점
 
@@ -41,7 +42,6 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 - SDK 업데이트 시 UI 코드 변경 불필요
 - 타입 안전성 보장
 - 계층별 독립적 개발 및 테스트 가능
-
 
 ## 주요 기능
 
@@ -108,7 +108,8 @@ BluetoothKit-SDK/
 
 ## LinkBand SDK 함수 설명
 
-LinkBand SDK를 사용하기 위한 핵심 함수들을 카테고리별로 정리했습니다. 각 함수의 용도와 사용 시점을 명확하게 설명합니다.
+> [!TIP]
+> LinkBand SDK를 사용하기 위한 핵심 함수들을 카테고리별로 정리했습니다. 각 함수의 용도와 사용 시점을 명확하게 설명합니다.
 
 ### 1. 기본 연결 관리
 
@@ -314,19 +315,20 @@ LinkBand SDK를 사용하기 위한 핵심 함수들을 카테고리별로 정�
   - 용도: 유효성 검증 오류 표시 상태
   - 타입: `@Published var Bool`
 
-### 💡 사용 팁
-
-1. **기본 워크플로우**: 스캔 → 연결 → 센서 활성화 → 데이터 수신 → 기록 → 중지 → 연결 해제
-2. **실시간 vs 배치**: 실시간 데이터는 `BluetoothKitViewModel`, 배치 데이터는 `BatchDataConfigurationViewModel` 사용
-3. **가속도계 모드**: 용도에 따라 원시값(중력 포함) 또는 순수 움직임(중력 제거) 선택
-4. **파일 관리**: 기록된 파일은 앱의 Documents 폴더에 저장되며 Files 앱에서 확인 가능
-5. **에러 방지**: 센서 활성화 전에 반드시 연결 상태 확인
+> [!TIP]
+> **사용 팁**
+> 1. **기본 워크플로우**: 스캔 → 연결 → 센서 활성화 → 데이터 수신 → 기록 → 중지 → 연결 해제
+> 2. **실시간 vs 배치**: 실시간 데이터는 `BluetoothKitViewModel`, 배치 데이터는 `BatchDataConfigurationViewModel` 사용
+> 3. **가속도계 모드**: 용도에 따라 원시값(중력 포함) 또는 순수 움직임(중력 제거) 선택
+> 4. **파일 관리**: 기록된 파일은 앱의 Documents 폴더에 저장되며 Files 앱에서 확인 가능
+> 5. **에러 방지**: 센서 활성화 전에 반드시 연결 상태 확인
 
 ---
 
 # 링크밴드 SDK 어댑터 기능 가이드
 
-LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터 수집과 기록을 위한 iOS SDK 어댑터 기능 가이드입니다.
+> [!NOTE]
+> LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터 수집과 기록을 위한 iOS SDK 어댑터 기능 가이드입니다.
 
 ## Overview
 
@@ -335,7 +337,6 @@ LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터
 
 ## 설정 가이드
 
-
 ### 아이폰 설정 가이드 (실제 기기에서 진행 필요)
 
 #### 1단계: 개발자 모드 활성화
@@ -343,7 +344,8 @@ LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터
 - `설정` → `개인정보 보호 및 보안` → `개발자 모드`
 - 개발자 모드를 **활성화**합니다.
 
-> 💡 **참고:**  
+> [!WARNING]
+> **참고:**  
 > Xcode에서 빌드를 시작한 후,  
 > **"개발자 앱을 신뢰할 수 없습니다"** 또는 이와 유사한 **경고 메시지**가 나타나는 경우, 아래 2단계를 추가로 진행하세요.
 
@@ -352,7 +354,6 @@ LooxidLabs 링크밴드 디바이스와의 Bluetooth 연결 및 센서 데이터
 - `설정` → `일반` → `VPN 및 기기 관리`
 - **개발자 앱** 항목에서 **본인의 Apple ID 이메일 주소**를 선택
 - 하단에 표시되는 **신뢰** 버튼을 눌러 앱을 인증합니다.
-
 
 ### 링크밴드 SDK 어댑터 다운받기
 
@@ -386,6 +387,9 @@ git pull origin develop
 
 ## 기본 설정 - 코드 예시
 
+> [!TIP]
+> 아래 코드 예시들은 실제 프로젝트에서 바로 사용할 수 있는 완전한 구현체입니다. 각 섹션별로 필요한 기능만 선택하여 사용하세요.
+
 ### ContentView.swift 파일 설정
 
 ```swift
@@ -412,6 +416,9 @@ struct ContentView: View {
 ```
 
 ### 1. 링크밴드 디바이스 Bluetooth 스캔
+
+> [!NOTE]
+> 스캔 기능은 Bluetooth 권한이 필요하며, 실제 기기에서만 정상 작동합니다.
 
 ```swift
 struct ScanControlView: View {
@@ -1025,6 +1032,9 @@ struct BatteryDataCard: View {
 ```
 
 ### 6. 데이터 기록 (CSV 저장) 구현
+
+> [!IMPORTANT]
+> 데이터 기록은 센서가 활성화된 상태에서만 가능합니다. 기록된 파일은 '파일'앱의 [나의 iPhone]->[프로젝트명] 폴더에 저장됩니다.
 
 ```swift
 struct RecordingControlView: View {
