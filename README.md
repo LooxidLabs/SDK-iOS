@@ -206,15 +206,17 @@ BluetoothKit-SDK/
 
 ### 3. 데이터 기록
 
-#### 💾 CSV 파일 저장
+#### 💾 CSV 및 JSON 파일 저장
 - **`bluetoothKit.startRecording()`**
-  - 용도: 센서 데이터를 CSV 파일로 저장 시작
+  - 용도: 센서 데이터를 CSV 및 JSON 파일로 저장 시작
   - 사용 시점: 데이터를 파일로 기록하고 싶을 때
   - 저장 위치: 앱 Documents 폴더
+  - 저장 형식: CSV (표 형태), JSON (구조화된 데이터)
 
 - **`bluetoothKit.stopRecording()`**
-  - 용도: CSV 파일 저장 중지
-  - 사용 시점: 기록을 멈추고 싶을 때
+  - 용도: 중지 시점까지의 센서 데이터를 CSV 및 JSON 파일로 저장 완료
+  - 사용 시점: 데이터 수집을 완료하고 파일로 저장하고 싶을 때
+  - 동작: 중지 버튼을 누른 시점까지 수집된 모든 데이터를 파일에 저장 후 기록 종료
 
 - **`bluetoothKit.isRecording`**
   - 용도: 현재 기록 중인지 확인
@@ -317,11 +319,12 @@ BluetoothKit-SDK/
 
 > [!TIP]
 > **사용 팁**
-> 1. **기본 워크플로우**: 스캔 → 연결 → 센서 활성화 → 데이터 수신 → 기록 → 중지 → 연결 해제
+> 1. **기본 워크플로우**: 스캔 → 연결 → 센서 활성화 → 데이터 수신 → 기록 시작 → 데이터 수집 → 기록 중지(데이터 저장 완료) → 연결 해제
 > 2. **실시간 vs 배치**: 실시간 데이터는 `BluetoothKitViewModel`, 배치 데이터는 `BatchDataConfigurationViewModel` 사용
 > 3. **가속도계 모드**: 용도에 따라 원시값(중력 포함) 또는 순수 움직임(중력 제거) 선택
 > 4. **파일 관리**: 기록된 파일은 앱의 Documents 폴더에 저장되며 Files 앱에서 확인 가능
 > 5. **에러 방지**: 센서 활성화 전에 반드시 연결 상태 확인
+> 6. **데이터 기록**: `stopRecording()`은 데이터 수집을 중지하는 것이 아니라, 수집된 모든 데이터를 파일에 저장 완료하는 기능
 
 ---
 
@@ -711,6 +714,10 @@ struct SensorToggleButton: View {
 ```
 
 ### 5. 수신된 센서 데이터를 카드 형태로 앱 인터페이스에 실시간 출력
+
+> [!TIP]
+> 센서 데이터는 실시간으로 업데이트되며, 각 센서별로 독립적인 카드로 표시됩니다. 데이터가 없는 경우 해당 카드는 자동으로 숨겨집니다.
+
 ```swift
 struct SensorDataView: View {
     @ObservedObject var bluetoothKit: BluetoothKitViewModel
@@ -1031,10 +1038,18 @@ struct BatteryDataCard: View {
 }
 ```
 
-### 6. 데이터 기록 (CSV 저장) 구현
+### 6. 데이터 기록 (CSV 및 JSON 저장) 구현
 
 > [!IMPORTANT]
 > 데이터 기록은 센서가 활성화된 상태에서만 가능합니다. 기록된 파일은 '파일'앱의 [나의 iPhone]->[프로젝트명] 폴더에 저장됩니다.
+> 
+> **기록 동작 방식**: 
+> - **시작**: `startRecording()`을 누르면 센서 데이터 수집과 동시에 파일 저장 시작
+> - **중지**: `stopRecording()`을 누르면 중지 시점까지 수집된 모든 데이터를 파일에 저장 후 기록 완료
+> 
+> **저장 형식**: 
+> - **CSV**: 표 형태로 데이터를 정리하여 Excel 등에서 쉽게 분석 가능
+> - **JSON**: 구조화된 데이터로 프로그래밍 언어에서 쉽게 파싱 가능
 
 ```swift
 struct RecordingControlView: View {
@@ -1098,7 +1113,7 @@ struct RecordingControlView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
-                    // 최근 파일 3개만 표시, csv만
+                    // 최근 파일 3개만 표시
                     ForEach(Array(bluetoothKit.recordedFiles.prefix(3).filter { $0.pathExtension.lowercased() == "csv" }), id: \.self) { file in
                         HStack {
                             Image(systemName: "doc.text")
